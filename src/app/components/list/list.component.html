@@ -1,0 +1,93 @@
+<section id="bg">
+  <div class="container">
+    <section class="search-banner text-white py-3 form-bg" id="search-banner">
+      <div class="container py-4 my-4">
+        <div class="row text-center pb-4">
+          <div class="col-md-12">
+            <h2 class="text-white main-head">Find your House</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card form-trans">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-sm">
+                    <div class="select">
+                      <select name="slct" id="slct" (change)="onSelectChange($event.target.value)">
+                        <option>Choose a filter option</option>
+                        <option value="by_distance">Houses nearer to my sister's house</option>
+                        <option value="by_rooms">Houses with more than 5 rooms</option>
+                        <option value="by_missing_info">Houses with incomplete information</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group has-search col-sm">
+                    <span class="fa fa-search form-control-feedback m-1"></span>
+                    <input type="text" class="form-control searchbar" name="search" [(ngModel)]="searchText"
+                      placeholder="Type the street name..">
+                  </div>
+                  <div class="col-sm">
+                    <button type="button" class="btn colored" (click)="onSelectChange('suggest')">(or) Suggest me a
+                      House
+                      <span class="fa fa-home form-control-feedback m-1"></span>
+                    </button>
+                  </div>
+                  <br />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="row mt-2">
+      <div class="col-md-6 text-left">
+        <i>We have found <span class="badge badge-danger font-italic">{{filtered.length}}</span> house(s)</i>
+        <span class="badge badge-warning ml-2" style="cursor: grab" (click)="clearAll()"> clear <span
+            class="fa fa-times form-control-feedback m-1"></span></span>
+      </div>
+      <div class="col-md-6 text-right">
+        <pagination-controls previousLabel="Prev" (pageChange)="page = $event"></pagination-controls>
+      </div>
+    </div>
+    <section class="search-results mt-1">
+      <div class="card-rows">
+        <div *ngFor="let house of filtered | filter: searchText | paginate: { itemsPerPage: 4, currentPage: page }">
+          <div class="card card-1 text-center mt-2" style="background-color: #34495e; color: white">
+            <div class="card-header">
+              {{house.street}}
+            </div>
+            <div class="card-body p-0 animated pulse">
+              <agm-map [latitude]="house.coords.lat" [zoom]="15" [longitude]="house.coords.lon"
+                [fullscreenControl]="true" [mapTypeControl]="true">
+                <agm-direction [origin]="{lat:house.coords.lat, lng:house.coords.lon}" [markerOptions]="markerOptions"
+                  [destination]="{lat:sisterHouse.coords.lat, lng:sisterHouse.coords.lon}">
+                </agm-direction>
+              </agm-map>
+            </div>
+            <div class="card-footer text-left" style="background-color: #34495e; color: white">
+              <div *ngIf="house.params" class="card-text">
+                <span> <span class="fa fa-bed form-control-feedback m-1"></span> Rooms:
+                  {{house.params.rooms || noInfo}}</span><br>
+                <span> <span class="fa fa-money-check-alt form-control-feedback m-1"></span> Value:
+                  {{house.params.value.toLocaleString() || noInfo}}</span>
+              </div>
+              <div *ngIf="!house.params" class="card-text">
+                <span class="fa fa-home form-control-feedback m-1"></span> {{noInfo}}
+              </div>
+              <br>
+              <i><span class="fa fa-running form-control-feedback m-1"></span> This house is
+                <strong>{{getDistanceFromSisterHouse(house)}}</strong> kilometers away from your sister's
+                house</i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center pt-4">
+        <pagination-controls previousLabel="Prev" (pageChange)="page = $event"></pagination-controls>
+      </div>
+    </section>
+  </div>
+</section>
